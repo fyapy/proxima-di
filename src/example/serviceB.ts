@@ -1,7 +1,8 @@
-import { inject, set } from "../index"
+import type { ServiceA } from "./serviceA"
+import { inject, provide } from "../index"
 import { DI } from "./di"
 
-const serviceA = inject(DI.serviceA)
+const serviceA = inject<ServiceA>(DI.serviceA)
 
 const getB = (textB: string) => {
   serviceA.getA('From get B')
@@ -11,5 +12,7 @@ const getB = (textB: string) => {
 const serviceB = {
   getB,
 }
+export type ServiceB = typeof serviceB
+export const injectServiceB = () => inject<ServiceB>(DI.serviceB)
 
-set(DI.serviceB, serviceB)
+provide(DI.serviceB, serviceB)

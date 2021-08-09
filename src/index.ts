@@ -1,39 +1,35 @@
+export type Signature = string | symbol
+export type Container = Record<Signature, any>
+export type AnyObject = Record<string, any>
 
-const container = {} as Record<string | symbol, any>
+const showSignature = (key: Signature) => typeof key === 'string'
+  ? key
+  : key.description
 
-export const set = <T>(key: symbol, service: T) => {
-  if (key in container) {
-    throw new Error(`Service with ${key.description} already exist!`)
+export const containerFactory = (container: Container) => {
+  const provide = <P>(key: Signature, service: P) => {
+    if (key in container) {
+      throw new Error(`Service with ${showSignature(key)} already exist!`)
+    }
+  
+    container[key as string] = service
   }
 
-  container[key as any] = service
+  const inject = <I extends AnyObject>(key: Signature): I => new Proxy<I>({} as I, {
+    get(target, prop: string) {
+      if (key in container) {
+        return container[key as string][prop]
+      }
+  
+      throw new Error(`Can't resolve service ${showSignature(key)}!`)
+    }
+  })
+
+  return {
+    provide,
+    inject,
+  }
 }
 
-export const inject = (key: symbol): Record<string, any> => new Proxy({}, {
-  get(target, prop: string) {
-    if (key in container) {
-      return container[key as any][prop]
-    }
-
-    throw new Error(`Can't resolve service ${key.description}!`)
-  }
-})
-
-// const createContainer = (initialState: Record<string, any> = {}) => {
-//   const state = { ...initialState }
-
-//   const set = <T>(key: symbol, service: T) => {
-//     if (key.description in state) {
-//       throw new Error(`Service with ${key.description} already exist!`)
-//     }
-
-//     state[key.description] = service
-//   }
-
-//   const inject = 
-
-//   return {
-//     set,
-//     inject: 
-//   }
-// }
+export const defaultContainer = {} as Container
+export const { inject, provide } = containerFactory(defaultContainer)

@@ -1,16 +1,27 @@
 {
-  "name": "proximadi",
+  "name": "proxima-di",
   "version": "0.0.1",
   "description": "fuctional style dependency injection library",
-  "main": "index.js",
   "author": "Amir Abdullin",
   "license": "MIT",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": ["dist/index.cjs.js", "dist/index.js"],
   "scripts": {
+    "build": "rimraf dist && rollup -c",
     "start": "ts-node ./src/example/index.ts"
   },
   "devDependencies": {
-    "@types/node": "^15.12.5",
-    "ts-node": "^10.0.0",
-    "typescript": "^4.3.4"
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@rollup/plugin-typescript": "^8.2.5",
+    "@types/node": "^16.4.13",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.56.1",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "ts-node": "^10.2.0",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5"
   }
 }

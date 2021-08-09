@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "target": "ES2017",
+    "target": "esnext",
     "lib": ["esnext"],
     "baseUrl": "./src",
     "removeComments": true,
-    "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "CommonJS",
+    "module": "es2015",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
+    "declaration": true,
+    "declarationDir": "."
   },
-  "include": ["src", "src/example/.ts"]
+  "include": ["src"],
+  "exclude": ["src/example"]
 }

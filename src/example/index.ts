@@ -1,11 +1,8 @@
-import { inject } from '..'
-import { DI } from './di'
+import { injectServiceA } from './serviceA'
+import { injectServiceB } from './serviceB'
 
-const serviceA = inject(DI.serviceA)
-const serviceB = inject(DI.serviceB)
-
-import './serviceA'
-import './serviceB'
+const serviceA = injectServiceA()
+const serviceB = injectServiceB()
 
 serviceA.getA('SOme a text')
 serviceB.getB('Some b')
