@@ -1,27 +1,51 @@
 {
-  "name": "proxima-di",
-  "version": "0.0.1",
-  "description": "fuctional style dependency injection library",
-  "author": "Amir Abdullin",
+  "version": "0.0.2",
   "license": "MIT",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": ["dist/index.cjs.js", "dist/index.js"],
-  "scripts": {
-    "build": "rimraf dist && rollup -c",
-    "start": "ts-node ./src/example/index.ts"
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
   },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "name": "proxima-di",
+  "author": "fyapy",
+  "module": "dist/proxima-di.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/proxima-di.cjs.production.min.js",
+      "limit": "5 KB"
+    },
+    {
+      "path": "dist/proxima-di.esm.js",
+      "limit": "5 KB"
+    }
+  ],
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^20.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.4",
-    "@rollup/plugin-typescript": "^8.2.5",
+    "@size-limit/preset-small-lib": "^5.0.2",
     "@types/node": "^16.4.13",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.56.1",
-    "rollup-plugin-sourcemaps": "^0.6.3",
-    "ts-node": "^10.2.0",
+    "size-limit": "^5.0.2",
+    "tsdx": "^0.14.1",
     "tslib": "^2.3.0",
     "typescript": "^4.3.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fyapy/proxima-di.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fyapy/proxima-di/issues"
+  },
+  "homepage": "https://github.com/fyapy/proxima-di#readme"
 }

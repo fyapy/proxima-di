@@ -2,6 +2,7 @@ export type Signature = string | symbol
 export type Container = Record<Signature, any>
 export type AnyObject = Record<string, any>
 
+const noop = () => {}
 const showSignature = (key: Signature) => typeof key === 'string'
   ? key
   : key.description
@@ -9,19 +10,26 @@ const showSignature = (key: Signature) => typeof key === 'string'
 export const containerFactory = (container: Container) => {
   const provide = <P>(key: Signature, service: P) => {
     if (key in container) {
-      throw new Error(`Service with ${showSignature(key)} already exist!`)
+      throw new Error(`Dependency with ${showSignature(key)} already exist!`)
     }
   
     container[key as string] = service
   }
 
-  const inject = <I extends AnyObject>(key: Signature): I => new Proxy<I>({} as I, {
-    get(target, prop: string) {
+  const inject = <I extends AnyObject>(key: Signature): I => new Proxy<I>(noop as unknown as I, {
+    apply(_, ctx, args) {
+      if (key in container) {
+        return container[key as string].apply(ctx, args)
+      }
+
+      throw new Error(`Can't call dependency ${showSignature(key)}!`);
+    },
+    get(_, prop: string) {
       if (key in container) {
         return container[key as string][prop]
       }
   
-      throw new Error(`Can't resolve service ${showSignature(key)}!`)
+      throw new Error(`Can't resolve dependency ${showSignature(key)}!`)
     }
   })
 
@@ -32,4 +40,13 @@ export const containerFactory = (container: Container) => {
 }
 
 export const defaultContainer = {} as Container
-export const { inject, provide } = containerFactory(defaultContainer)
+const proxima = containerFactory(defaultContainer)
+
+export const {
+  provide,
+  inject,
+} = {
+  inject: proxima.inject,
+  provide: proxima.provide,
+}
+export default proxima
