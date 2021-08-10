@@ -8,45 +8,44 @@ const showSignature = (key: Signature) => typeof key === 'string'
   : key.description
 
 export const containerFactory = (container: Container) => {
-  const provide = <P>(key: Signature, service: P) => {
-    if (key in container) {
-      throw new Error(`Dependency with ${showSignature(key)} already exist!`)
+  const newDependency = (key: Signature = Symbol()) => {
+    const name = showSignature(key)
+
+    const provide = <P>(service: P) => {
+      if (key in container) {
+        throw new Error(`Dependency with ${name} already exist!`)
+      }
+    
+      container[key as string] = service
     }
   
-    container[key as string] = service
+    const inject = <I extends AnyObject>(): I => new Proxy<I>(noop as unknown as I, {
+      apply(_, ctx, args) {
+        if (key in container) {
+          return container[key as string].apply(ctx, args)
+        }
+  
+        throw new Error(`Can't call dependency ${name}!`);
+      },
+      get(_, prop: string) {
+        if (key in container) {
+          return container[key as string][prop]
+        }
+    
+        throw new Error(`Can't resolve dependency ${name}!`)
+      }
+    })
+  
+    return {
+      provide,
+      inject,
+    }
   }
 
-  const inject = <I extends AnyObject>(key: Signature): I => new Proxy<I>(noop as unknown as I, {
-    apply(_, ctx, args) {
-      if (key in container) {
-        return container[key as string].apply(ctx, args)
-      }
-
-      throw new Error(`Can't call dependency ${showSignature(key)}!`);
-    },
-    get(_, prop: string) {
-      if (key in container) {
-        return container[key as string][prop]
-      }
-  
-      throw new Error(`Can't resolve dependency ${showSignature(key)}!`)
-    }
-  })
-
   return {
-    provide,
-    inject,
+    newDependency,
   }
 }
 
 export const defaultContainer = {} as Container
-const proxima = containerFactory(defaultContainer)
-
-export const {
-  provide,
-  inject,
-} = {
-  inject: proxima.inject,
-  provide: proxima.provide,
-}
-export default proxima
+export const { newDependency } = containerFactory(defaultContainer)
