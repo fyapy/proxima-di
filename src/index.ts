@@ -8,10 +8,10 @@ const showSignature = (key: Signature) => typeof key === 'string'
   : key.description
 
 export const containerFactory = (container: Container) => {
-  const newDependency = (key: Signature = Symbol()) => {
+  const newDependency = <P extends AnyObject>(key: Signature = Symbol()) => {
     const name = showSignature(key)
 
-    const provide = <P>(service: P) => {
+    const provide = (service: P) => {
       if (key in container) {
         throw new Error(`Dependency with ${name} already exist!`)
       }
@@ -19,7 +19,7 @@ export const containerFactory = (container: Container) => {
       container[key as string] = service
     }
   
-    const inject = <I extends AnyObject>(): I => new Proxy<I>(noop as unknown as I, {
+    const inject = () => new Proxy<P>(noop as unknown as P, {
       apply(_, ctx, args) {
         if (key in container) {
           return container[key as string].apply(ctx, args)
