@@ -8,6 +8,19 @@ const showSignature = (key: Signature) => typeof key === 'string'
   : key.description
 
 export const containerFactory = (container: Container) => {
+  const clearDependency = (key: Signature) => {
+    const name = showSignature(key)
+
+    if (key in container) {
+      delete container[key as string]
+      return
+    }
+
+    throw new Error(`Dependency with ${name} don't exist!`)
+  }
+
+  const clearAll = () => Object.keys(container).forEach(key => delete container[key])
+
   const newDependency = <P extends AnyObject>(key: Signature = Symbol()) => {
     const name = showSignature(key)
 
@@ -35,15 +48,20 @@ export const containerFactory = (container: Container) => {
         throw new Error(`Can't resolve dependency ${name}!`)
       }
     })
+
+    const clear = () => clearDependency(key)
   
     return {
       provide,
       inject,
+      clear,
     }
   }
 
   return {
     newDependency,
+    clearDependency,
+    clearAll,
   }
 }
 
