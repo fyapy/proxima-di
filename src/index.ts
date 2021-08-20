@@ -68,4 +68,8 @@ export const containerFactory = (container: Container) => {
 }
 
 export const defaultContainer = {} as Container
-export const { newDependency } = containerFactory(defaultContainer)
+export const { 
+  newDependency,
+  clearDependency,
+  clearAll,
+} = containerFactory(defaultContainer)
