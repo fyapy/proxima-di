@@ -55,6 +55,8 @@ export const containerFactory = (container: Container) => {
       provide,
       inject,
       clear,
+      name,
+      key,
     }
   }
 
