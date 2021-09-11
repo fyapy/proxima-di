@@ -1,75 +1,93 @@
-export type Signature = string | symbol
-export type Container = Record<Signature, any>
+export type Container = Map<string, any>
 export type AnyObject = Record<string, any>
 
 const noop = () => {}
-const showSignature = (key: Signature) => typeof key === 'string'
-  ? key
-  : key.description
+type Noop = () => void
+
+type Service<D = Noop, F = Noop> = {
+  name: string
+  inject: D
+  clear: () => void
+  fn: F
+}
+
+
 
 export const containerFactory = (container: Container) => {
-  const clearDependency = (key: Signature) => {
-    const name = showSignature(key)
-
-    if (key in container) {
-      delete container[key as string]
-      return
-    }
-
-    throw new Error(`Dependency with ${name} don't exist!`)
-  }
-
-  const clearAll = () => Object.keys(container).forEach(key => delete container[key])
-
-  const newDependency = <P extends AnyObject>(key: Signature = Symbol()) => {
-    const name = showSignature(key)
-
-    const provide = (service: P) => {
-      if (key in container) {
-        throw new Error(`Dependency with ${name} already exist!`)
+  const service = <
+    I extends Record<string, Service>,
+    F extends (injects: Record<keyof I, ReturnType<I[keyof I]['inject']>>) => any
+  >(name: string, injects: I, depFn: F) => {
+    const proxyInjects = Object.entries(injects).reduce<AnyObject>((acc, [key, value]) => {
+      if (key in acc) {
+        throw new Error(`Injects with key '${key}' in service '${name}' already exist!`)
       }
+
+      acc[key] = value.inject()
+
+      return acc
+    }, {}) as Parameters<F>[0]
     
-      container[key as string] = service
-    }
-  
-    const inject = () => new Proxy<P>(noop as unknown as P, {
+    const inject = () => new Proxy<ReturnType<F>>(noop as unknown as ReturnType<F>, {
       apply(_, ctx, args) {
-        if (key in container) {
-          return container[key as string].apply(ctx, args)
+        if (container.has(name)) {
+          return container.get(name).apply(ctx, args)
         }
-  
-        throw new Error(`Can't call dependency ${name}!`);
+
+        throw new Error(`Can't call service with name '${name}'!`);
       },
       get(_, prop: string) {
-        if (key in container) {
-          return container[key as string][prop]
+        if (container.has(name)) {
+          return container.get(name)[prop]
         }
     
-        throw new Error(`Can't resolve dependency ${name}!`)
+        throw new Error(`Can't resolve service '${name}'!`)
       }
     })
 
-    const clear = () => clearDependency(key)
-  
+    const clear = () => clearService(name)
+
+    if (container.has(name)) {
+      throw new Error(`Service with name '${name}' already exist!`)
+    }
+    container.set(name, depFn(proxyInjects))
+
     return {
-      provide,
       inject,
       clear,
       name,
-      key,
+      fn: depFn,
+    } as Service<() => ReturnType<F>, F>
+  }
+
+  const clearService = (name: string) => {
+    if (container.has(name)) {
+      return container.delete(name)
+    }
+
+    throw new Error(`Service with name '${name}' don't exist!`)
+  }
+
+  const clearAll = () => {
+    for (const key of container.keys()) {
+      container.delete(key)
     }
   }
 
+  const debug = <D extends Service>(dep: D) => container.get(dep.name) as ReturnType<D['inject']>
+
   return {
-    newDependency,
-    clearDependency,
+    service,
+    clearService,
     clearAll,
+    debug,
   }
 }
 
-export const defaultContainer = {} as Container
+export const defaultContainer: Container = new Map()
 export const { 
-  newDependency,
-  clearDependency,
+  service,
   clearAll,
+  clearService,
+  debug,
 } = containerFactory(defaultContainer)
