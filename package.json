@@ -20,7 +20,18 @@
     "analyze": "size-limit --why"
   },
   "name": "proxima-di",
-  "author": "fyapy",
+  "author": "Amir Abdullin",
+  "keywords": [
+    "ioc",
+    "di",
+    "javascript",
+    "typescript",
+    "node",
+    "dependency injection",
+    "dependency inversion",
+    "inversion of control container",
+    "Functional style dependency injection"
+  ],
   "module": "dist/proxima-di.esm.js",
   "size-limit": [
     {
