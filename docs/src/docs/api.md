@@ -20,6 +20,7 @@ Container method for defining a new service.
 | clear  | `() => void`  | Function that will remove a service from container.       |
 | fn  | `(injects: Record<keyof I, ReturnType<I[keyof I]['inject']>>) => any` | Service function from params. Can be used to write tests (Jest or other).     |
 | inject  | `() => any` | A function that allows you to access the service.     |
+| reset  | `<I extends Record<string, ReturnType<service>>, F extends (injects: Record<keyof I, ReturnType<I[keyof I]['inject']>>) => any>(injects: I, service: F) => any` | A function that will call the cleanup method and reset the service with a new value.     |
 
 ### Define service
 

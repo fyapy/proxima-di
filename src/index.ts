@@ -18,7 +18,7 @@ export const containerFactory = (container: Container) => {
     I extends Record<string, Service>,
     F extends (injects: Record<keyof I, ReturnType<I[keyof I]['inject']>>) => any
   >(name: string, injects: I, depFn: F) => {
-    const proxyInjects = Object.entries(injects).reduce<AnyObject>((acc, [key, value]) => {
+    const getInjects = (injectObj: I) => Object.entries(injectObj).reduce<AnyObject>((acc, [key, value]) => {
       if (key in acc) {
         throw new Error(`Injects with key '${key}' in service '${name}' already exist!`)
       }
@@ -47,13 +47,20 @@ export const containerFactory = (container: Container) => {
 
     const clear = () => clearService(name)
 
+    const reset = (injects: I, depFn: F) => {
+      clear()
+
+      container.set(name, depFn(getInjects(injects)))
+    }
+
     if (container.has(name)) {
       throw new Error(`Service with name '${name}' already exist!`)
     }
-    container.set(name, depFn(proxyInjects))
+    container.set(name, depFn(getInjects(injects)))
 
     return {
       inject,
+      reset,
       clear,
       name,
       fn: depFn,
